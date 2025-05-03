@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: order-service
+
+  profiles:
+    active: dev
+
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: CONFIG-SERVER
+      fail-fast: true
+

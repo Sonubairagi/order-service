@@ -1,0 +1,116 @@
+services:
+#  app:
+#    build: .
+#    ports:
+#      - "8081:8081"
+#    container_name: order_service-container
+#    environment:
+#      MONGODB_URI: mongodb://sonu_vairagi_mongo:Sonu@7240@mongodb:27017/user_service?authSource=admin
+#    depends_on:
+#      - mongodb
+#    networks:
+#      - order-service-network
+#    volumes:
+#      - order_service-data:/var/lib/order_service/data
+#    restart: always
+
+  mongodb:
+    image: mongo
+    container_name: mongodb-container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: sonu_vairagi_mongo
+      MONGO_INITDB_ROOT_PASSWORD: Sonu@7240
+    ports:
+      - "27017:27017"
+    networks:
+      - order-service-network
+    volumes:
+      - mongodb-data:/var/lib/mongodb/data
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express-container
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=sonu_vairagi_mongo_express
+      - ME_CONFIG_BASICAUTH_PASSWORD=Sonu@7240
+    ports:
+      - "9091:8081"
+    networks:
+      - order-service-network
+    volumes:
+      - mongo_express-data:/var/lib/mongo_express/data
+
+  redis:
+    image: redis/redis-stack
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - order-service-network
+    volumes:
+      - redis-data:/var/lib/redis/data
+
+  redis-insight:
+    image: redis/redis-stack
+    container_name: redis-insight-container
+    restart: always
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+    networks:
+      - order-service-network
+    volumes:
+      - redis_insight-data:/var/lib/redis_insight/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper
+    container_name: zookeeper-container
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+    networks:
+      - order-service-network
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: kafka-container
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092, PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - order-service-network
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+
+networks:
+  order-service-network:
+    driver: bridge
+
+volumes:
+#  order_service-data:
+  mongodb-data:
+  mongo_express-data:
+  redis-data:
+  redis_insight-data:
+  zookeeper-data:
+  kafka-data:
+
+
